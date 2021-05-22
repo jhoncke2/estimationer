@@ -1,0 +1,29 @@
+[
+    {
+        "id":0,
+        "name":"task_1",
+        "pesimistic":3.5,
+        "optimistic":0.1,
+        "normal":1,
+        "estimate":1.26,
+        "uncertainty":0.56
+    },
+    {
+        "id":1,
+        "name":"task_2",
+        "pesimistic":7,
+        "optimistic":0.2,
+        "normal":2,
+        "estimate":2.53,
+        "uncertainty":1.12
+    },
+    {
+        "id":2,
+        "name":"task_3",
+        "pesimistic":14,
+        "optimistic":0.4,
+        "normal":4,
+        "estimate":5.06,
+        "uncertainty":2.24
+    }
+]
