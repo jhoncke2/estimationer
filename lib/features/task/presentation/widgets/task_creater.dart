@@ -2,15 +2,17 @@ import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class OnCreationTask extends StatefulWidget {
+import '../bloc/tasks_bloc.dart';
 
-  const OnCreationTask({Key key}) : super(key: key);
+class TaskCreater extends StatefulWidget {
+
+  const TaskCreater({Key key}) : super(key: key);
 
   @override
-  _OnCreationTaskState createState() => _OnCreationTaskState();
+  _TaskCreaterState createState() => _TaskCreaterState();
 }
 
-class _OnCreationTaskState extends State<OnCreationTask> {
+class _TaskCreaterState extends State<TaskCreater> {
   TextEditingController nameController;
   TextEditingController optimisticController;
   TextEditingController normalController;
@@ -87,21 +89,28 @@ class _OnCreationTaskState extends State<OnCreationTask> {
                 ],
               ),
             ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.32,
-              padding: EdgeInsets.only(left: 12.5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _crateEstimationText('Estimate:'),
-                  _crateEstimationText('Uncertainty:')
-                ],
-              ),
-            )
+            _createRightElements()
           ],
         )
       ],
+    );
+  }
+  
+  Widget _createRightElements(){
+    final OnTaskCreation state = BlocProvider.of<TasksBloc>(context).state;
+    final String stringEstimate = (state.estimate == null)? '' : state.estimate.toStringAsFixed(2);
+    final String stringUncertainty = (state.uncertainty == null)? '' : state.uncertainty.toStringAsFixed(2);
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.32,
+      padding: EdgeInsets.only(left: 12.5),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _crateEstimationText('Estimate: $stringEstimate'),
+          _crateEstimationText('Uncertainty: $stringUncertainty')
+        ],
+      ),
     );
   }
 
@@ -122,8 +131,17 @@ class _OnCreationTaskState extends State<OnCreationTask> {
             ),
           ),
         ),
+        onChanged: _onTextFieldChanged,
       ),
     );
+  }
+
+  void _onTextFieldChanged(String newValue){
+    BlocProvider.of<TasksBloc>(context).add(CalculateEstimateAndUncertainty(
+      optimistic: optimisticController.text,
+      normal: normalController.text,
+      pesimistic: pesimisticController.text
+    ));
   }
 
   Widget _crateEstimationText(String text){
@@ -141,7 +159,9 @@ class _OnCreationTaskState extends State<OnCreationTask> {
     return _createButton(
       Colors.red,
       Icons.delete,
-      (){}
+      (){
+        BlocProvider.of<TasksBloc>(context).add(CancelTaskCreation());
+      }
     );
   }
 
@@ -149,7 +169,14 @@ class _OnCreationTaskState extends State<OnCreationTask> {
     return _createButton(
       Colors.green,
       Icons.done,
-      (){},
+      (){
+        BlocProvider.of<TasksBloc>(context).add(CreateTask(
+          name: nameController.text,
+          optimistic: optimisticController.text,
+          normal: normalController.text,
+          pesimistic: pesimisticController.text
+        ));
+      },
       RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           bottomRight: Radius.circular(15.0)

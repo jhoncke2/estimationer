@@ -42,3 +42,22 @@ class OnTaskCreation extends TasksLoaded{
     this.uncertainty  
   ];
 }
+
+class LoadingTaskCreation extends TasksLoaded{}
+
+class TaskInputError extends TasksLoaded{
+  final String message;
+
+  TaskInputError({
+    @required this.message,
+    @required List<EstimatedTask> tasks
+  }):super(
+    tasks: tasks
+  );
+
+  @override
+  List<Object> get props => [
+    ...super.props,
+    this.message
+  ];
+}

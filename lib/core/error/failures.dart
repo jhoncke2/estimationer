@@ -30,3 +30,7 @@ class DBFailure extends Failure{
 class UncompleteInformationFailure extends Failure{
   
 }
+
+class InputFormatFailure extends Failure{
+  
+}

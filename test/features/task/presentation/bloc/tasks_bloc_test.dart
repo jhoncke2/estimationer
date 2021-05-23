@@ -1,17 +1,19 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
+import 'package:mockito/mockito.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:estimationer/core/error/failures.dart';
 import 'package:estimationer/core/domain/use_cases/use_case.dart';
+import 'package:estimationer/core/helpers/string_to_double_converter.dart';
 import 'package:estimationer/features/task/data/models/task_model.dart';
 import 'package:estimationer/features/task/domain/entities/task.dart';
 import 'package:estimationer/features/task/domain/use_cases/calculate_estimate.dart';
 import 'package:estimationer/features/task/domain/use_cases/calculate_uncertainty.dart';
 import 'package:estimationer/features/task/domain/use_cases/get_tasks.dart';
+import 'package:estimationer/features/task/domain/use_cases/params.dart';
 import 'package:estimationer/features/task/domain/use_cases/remove_task.dart';
 import 'package:estimationer/features/task/domain/use_cases/set_task.dart';
 import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-
 import '../../../../fixtures/fixture_reader.dart';
 
 class MockGetTasks extends Mock implements GetTasks{}
@@ -19,6 +21,7 @@ class MockSetTask extends Mock implements SetTask{}
 class MockRemoveTask extends Mock implements RemoveTask{}
 class MockCalculateEstimate extends Mock implements CalculateEstimate{}
 class MockCalculateUncertainty extends Mock implements CalculateUncertainty{}
+class MockStringToDoubleConverter extends Mock implements InputValuesManager{}
 
 TasksBloc bloc;
 MockGetTasks getTasks;
@@ -26,9 +29,11 @@ MockSetTask setTask;
 MockRemoveTask removeTask;
 MockCalculateEstimate calculateEstimate;
 MockCalculateUncertainty calculateUncertainty;
+MockStringToDoubleConverter inputsManager;
 
 void main(){
   setUp((){
+    inputsManager = MockStringToDoubleConverter();
     calculateUncertainty = MockCalculateUncertainty();
     calculateEstimate = MockCalculateEstimate();
     removeTask = MockRemoveTask();
@@ -39,7 +44,8 @@ void main(){
       setTask: setTask, 
       removeTask: removeTask,
       calculateEstimate: calculateEstimate,
-      calculateUncertainty: calculateUncertainty
+      calculateUncertainty: calculateUncertainty,
+      inputsManager: inputsManager
     );
   });
 
@@ -91,6 +97,121 @@ void main(){
     });
   });
 
+
+  group('calculateEstimateAndUncertainty', (){
+    List<EstimatedTask> tTasks;
+    double tOptimistic;
+    double tNormal;
+    double tPesimistic;
+    double tEstimate;
+    double tUncertainty;
+    setUp((){
+      tTasks = _getTasksFromFixture();
+      tOptimistic = 1;
+      tNormal = 1.8;
+      tPesimistic = 5;
+      tEstimate = 2.3;
+      tUncertainty = 0.5;
+      bloc.emit(OnTaskCreation(estimate: null, uncertainty: null, tasks: tTasks));  
+    });
+
+    test('should call the useCases', ()async{
+      when(inputsManager.convertListOfStringsToDoubles(any)).thenAnswer((_) => Right([tOptimistic, tNormal, tPesimistic]));
+      when(calculateEstimate.call(any)).thenAnswer((_) async => Right(tEstimate));
+      when(calculateUncertainty.call(any)).thenAnswer((_) async => Right(tUncertainty));
+      bloc.add(CalculateEstimateAndUncertainty(
+        optimistic: tOptimistic.toString(),
+        normal: tNormal.toString(),
+        pesimistic: tPesimistic.toString()
+      ));
+
+      await untilCalled(inputsManager.convertListOfStringsToDoubles(any));
+      verify(inputsManager.convertListOfStringsToDoubles([
+        tOptimistic.toString(),
+        tNormal.toString(),
+        tPesimistic.toString()
+      ]));
+      
+      await untilCalled(calculateEstimate.call(any));
+      verify(calculateEstimate.call(
+        TaskCalculationParams(pesimistic: tPesimistic, normal: tNormal, optimistic: tOptimistic)
+      ));
+      
+      await untilCalled(calculateUncertainty(any));
+      verify(calculateUncertainty.call(
+        TaskCalculationParams(pesimistic: tPesimistic, normal: tNormal, optimistic: tOptimistic)
+      ));
+      
+    });
+
+    test('should yield the specified ordered states when all goes good', ()async{
+      when(inputsManager.convertListOfStringsToDoubles(any)).thenAnswer((_) => Right([tOptimistic, tNormal, tPesimistic]));
+      when(calculateEstimate.call(any)).thenAnswer((_) async => Right(tEstimate));
+      when(calculateUncertainty.call(any)).thenAnswer((_) async => Right(tUncertainty));
+      final expectedOrderedStates = [
+        OnTaskCreation(estimate: tEstimate, uncertainty: tUncertainty, tasks: tTasks)
+      ];
+      expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
+      bloc.add(CalculateEstimateAndUncertainty(
+        optimistic: tOptimistic.toString(),
+        normal: tNormal.toString(),
+        pesimistic: tPesimistic.toString()
+      ));
+    });
+
+    test('should yield the specified ordered states when inputs are not correct', ()async{
+      when(inputsManager.convertListOfStringsToDoubles(any)).thenAnswer((_) => Left(InputFormatFailure()));
+      when(calculateEstimate.call(any)).thenAnswer((_) async => Right(tEstimate));
+      when(calculateUncertainty.call(any)).thenAnswer((_) async => Right(tUncertainty));
+      final expectedOrderedStates = [
+        TaskInputError(
+          message: TasksBloc.BAD_INPUT_VALUE_MESSAGE, 
+          tasks: tTasks
+        ),
+      ];
+      expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
+      bloc.add(CalculateEstimateAndUncertainty(
+        optimistic: tOptimistic.toString(),
+        normal: tNormal.toString(),
+        pesimistic: tPesimistic.toString()
+      ));
+    });
+
+    test('should do nothing when converter return Left(UncompletInformationFailure())', ()async{
+      when(inputsManager.convertListOfStringsToDoubles(any)).thenAnswer((_) => Left(UncompleteInformationFailure()));
+      when(calculateEstimate.call(any)).thenAnswer((_) async => Right(tEstimate));
+      when(calculateUncertainty.call(any)).thenAnswer((_) async => Right(tUncertainty));
+      final expectedOrderedStates = [
+      ];
+      expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
+      bloc.add(CalculateEstimateAndUncertainty(
+        optimistic: tOptimistic.toString(),
+        normal: tNormal.toString(),
+        pesimistic: tPesimistic.toString()
+      ));
+    });
+  });
+
+  group('cancelTaskCreation', (){
+    List<EstimatedTask> tTasks;
+    setUp((){
+      tTasks = _getTasksFromFixture();
+      bloc.emit(OnTaskCreation(
+        tasks: tTasks,
+        estimate: null,
+        uncertainty: null
+      ));
+    });
+
+    test('should call the specified ordered states', ()async{
+      final expectedOrderedStates = [
+        OnTasks(tasks: tTasks)
+      ];
+      expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
+      bloc.add(CancelTaskCreation());
+    });
+  });
+
   group('createTask', (){
     List<EstimatedTask> tTasks;
     List<EstimatedTask> tUpdatedTasks;
@@ -107,61 +228,89 @@ void main(){
       ));
     });
 
-    test('should call the specified useCase', ()async{
+    test('should call the specified useCase, transformations and evaluations', ()async{
+      when(inputsManager.evaluateStringValue(any)).thenReturn(Right(null));
+      when(inputsManager.convertListOfStringsToDoubles(any)).thenReturn(Right( [
+        tCreatedTask.optimistic,
+        tCreatedTask.normal,
+        tCreatedTask.pesimistic
+      ] ));
       when(setTask.call(any)).thenAnswer((_) async => Right(null));
       when(getTasks.call(any)).thenAnswer((_) async => Right(tUpdatedTasks));
       bloc.add(CreateTask(
         name: tCreatedTask.name,
-        optimistic: tCreatedTask.optimistic,
-        normal: tCreatedTask.normal,
-        pesimistic: tCreatedTask.pesimistic,
-        task: tCreatedTask
+        optimistic: tCreatedTask.optimistic.toString(),
+        normal: tCreatedTask.normal.toString(),
+        pesimistic: tCreatedTask.pesimistic.toString()
       ));
+
+      await untilCalled(inputsManager.evaluateStringValue(any));
+      verify(inputsManager.evaluateStringValue(tCreatedTask.name));
+      await untilCalled(inputsManager.convertListOfStringsToDoubles(any));
+      verify(inputsManager.convertListOfStringsToDoubles([
+        tCreatedTask.optimistic.toString(),
+        tCreatedTask.normal.toString(),
+        tCreatedTask.pesimistic.toString()
+      ]));
       await untilCalled(setTask(any));
       verify(setTask(SetTaskParams(task: tCreatedTask)));
       await untilCalled(getTasks(any));
       verify(getTasks(NoParams()));
     });
 
+    
     test('should yield the specified ordered states when all goes good', ()async{
+      when(inputsManager.evaluateStringValue(any)).thenReturn(Right(null));
+      when(inputsManager.convertListOfStringsToDoubles(any)).thenReturn(Right( [
+        tCreatedTask.optimistic,
+        tCreatedTask.normal,
+        tCreatedTask.pesimistic
+      ] ));
       when(setTask.call(any)).thenAnswer((_) async => Right(null));
       when(getTasks.call(any)).thenAnswer((_) async => Right(tUpdatedTasks));
       final expectedOrderedStates = [
-        LoadingTasks(),
+        LoadingTaskCreation(),
         OnTasks(tasks: tUpdatedTasks)
       ];
       expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
       bloc.add(CreateTask(
         name: tCreatedTask.name,
-        optimistic: tCreatedTask.optimistic,
-        normal: tCreatedTask.normal,
-        pesimistic: tCreatedTask.pesimistic,
-        task: tCreatedTask
+        optimistic: tCreatedTask.optimistic.toString(),
+        normal: tCreatedTask.normal.toString(),
+        pesimistic: tCreatedTask.pesimistic.toString()
       ));
     });
-  });
 
-  group('calculateEstimateAndUncertainty', (){
-    double tOptimistic;
-    double tNormal;
-    double tPesimistic;
-    double tEstimate;
-    double tUncertainty;
-    setUp((){
-      tOptimistic = 1.0;
-      tNormal = 2.0;
-      tPesimistic = 3.0;
-      tEstimate = 4.0;
-      tUncertainty = 0.5;
+    test('''should yield the specified ordered states when 
+    .evaluateString return Left(UNCOMPLETEINFORMATION())''', ()async{
+      when(inputsManager.evaluateStringValue(any)).thenReturn(Left(UncompleteInformationFailure()));
+      final expectedOrderedStates = [
+        LoadingTaskCreation(),
+        TaskInputError(message: TasksBloc.UNCOMPLETE_INPUT_VALUES, tasks: tTasks)
+      ];
+      expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
+      bloc.add(CreateTask(
+        name: tCreatedTask.name,
+        optimistic: tCreatedTask.optimistic.toString(),
+        normal: tCreatedTask.normal.toString(),
+        pesimistic: tCreatedTask.pesimistic.toString()
+      ));
     });
 
-    test('should call the specified useCases when all goes good', ()async{
-      when(calculateEstimate.call(any)).thenAnswer((_)async => Right(tEstimate));
-      when(calculateUncertainty.call(any)).thenAnswer((_)async => Right(tUncertainty));
-      bloc.add(CalculateEstimateAndUncertainty(
-        normal: tNormal.toString(),
-        pesimistic: tPesimistic.toString(),
-        optimistic: tOptimistic.toString()
+    test('''should yield the specified ordered states when 
+    .evaluateString return Left(UNCOMPLETEINFORMATION())''', ()async{
+      when(inputsManager.evaluateStringValue(any)).thenReturn(Right(null));
+      when(inputsManager.convertListOfStringsToDoubles(any)).thenReturn(Left(UncompleteInformationFailure()));
+      final expectedOrderedStates = [
+        LoadingTaskCreation(),
+        TaskInputError(message: TasksBloc.UNCOMPLETE_INPUT_VALUES, tasks: tTasks)
+      ];
+      expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
+      bloc.add(CreateTask(
+        name: tCreatedTask.name,
+        optimistic: tCreatedTask.optimistic.toString(),
+        normal: tCreatedTask.normal.toString(),
+        pesimistic: tCreatedTask.pesimistic.toString()
       ));
     });
   });

@@ -1,3 +1,4 @@
+import 'package:estimationer/core/helpers/string_to_double_converter.dart';
 import 'package:estimationer/core/platform/database.dart';
 import 'package:estimationer/features/task/data/data_source/local_data_source.dart';
 import 'package:estimationer/features/task/data/repository/tasks_repository.dart';
@@ -27,13 +28,15 @@ Future init()async{
   sl.registerLazySingleton(()=>RemoveTask(repository: sl()));
   sl.registerLazySingleton(()=>CalculateEstimate());
   sl.registerLazySingleton(() => CalculateUncertainty());
+  sl.registerLazySingleton<InputValuesManager>(()=>InputValuesManagerImpl());
 
   sl.registerLazySingleton(()=>TasksBloc(
     getTasks: sl(), 
     setTask: sl(), 
     removeTask: sl(), 
     calculateEstimate: sl(), 
-    calculateUncertainty: sl()
+    calculateUncertainty: sl(),
+    inputsManager: sl()
   ));
   
 

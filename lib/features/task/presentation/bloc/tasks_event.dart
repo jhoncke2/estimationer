@@ -22,17 +22,17 @@ class CalculateEstimateAndUncertainty extends TasksEvent{
   });
 }
 
+class CancelTaskCreation extends TasksEvent{}
+
 class CreateTask extends TasksEvent{
   final String name;
-  final double optimistic;
-  final double normal;
-  final double pesimistic;
-  final EstimatedTask task;
+  final String optimistic;
+  final String normal;
+  final String pesimistic;
   CreateTask({
     @required this.name,
     @required this.optimistic,
     @required this.normal,
     @required this.pesimistic,
-    @required this.task
   });
 }

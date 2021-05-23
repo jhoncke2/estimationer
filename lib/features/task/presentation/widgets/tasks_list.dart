@@ -4,7 +4,7 @@ import 'package:estimationer/features/task/presentation/widgets/task_container.d
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'on_creation_task_container.dart';
+import 'task_creater.dart';
 // ignore: must_be_immutable
 class TasksList extends StatelessWidget {
   final List<EstimatedTask> tasks;
@@ -57,7 +57,7 @@ class TasksList extends StatelessWidget {
       (t) => ExistingTask(task: t)
     ).toList();
     if(isOnCreation){
-      tasksWidgets.add(OnCreationTask());
+      tasksWidgets.add(TaskCreater());
     }
     return Container(
       padding: EdgeInsets.symmetric(vertical: 15, horizontal: 0),
