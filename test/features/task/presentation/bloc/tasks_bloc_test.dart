@@ -86,7 +86,7 @@ void main(){
     
     test('should yield the specified ordered states', ()async{
       final expectedOrderedStates = [
-        OnTaskCreation(
+        OnGoodTaskCreation(
           tasks: tTasks,
           estimate: null,
           uncertainty: null
@@ -112,7 +112,7 @@ void main(){
       tPesimistic = 5;
       tEstimate = 2.3;
       tUncertainty = 0.5;
-      bloc.emit(OnTaskCreation(estimate: null, uncertainty: null, tasks: tTasks));  
+      bloc.emit(OnGoodTaskCreation(estimate: null, uncertainty: null, tasks: tTasks));  
     });
 
     test('should call the useCases', ()async{
@@ -149,7 +149,7 @@ void main(){
       when(calculateEstimate.call(any)).thenAnswer((_) async => Right(tEstimate));
       when(calculateUncertainty.call(any)).thenAnswer((_) async => Right(tUncertainty));
       final expectedOrderedStates = [
-        OnTaskCreation(estimate: tEstimate, uncertainty: tUncertainty, tasks: tTasks)
+        OnGoodTaskCreation(estimate: tEstimate, uncertainty: tUncertainty, tasks: tTasks)
       ];
       expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
       bloc.add(CalculateEstimateAndUncertainty(
@@ -196,7 +196,7 @@ void main(){
     List<EstimatedTask> tTasks;
     setUp((){
       tTasks = _getTasksFromFixture();
-      bloc.emit(OnTaskCreation(
+      bloc.emit(OnGoodTaskCreation(
         tasks: tTasks,
         estimate: null,
         uncertainty: null
@@ -221,7 +221,7 @@ void main(){
       tUpdatedTasks = [_getTasksFromFixture()[0]];
       tCreatedTask = _getTasksFromFixture()[0];
       tCreatedTask = _getTaskFromTaskModel(tCreatedTask);
-      bloc.emit(OnTaskCreation(
+      bloc.emit(OnGoodTaskCreation(
         tasks: tTasks,
         estimate: tCreatedTask.estimate,
         uncertainty: tCreatedTask.uncertainty

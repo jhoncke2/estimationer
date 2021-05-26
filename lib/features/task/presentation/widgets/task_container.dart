@@ -1,48 +1,44 @@
-import 'package:estimationer/features/task/domain/entities/task.dart';
-import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-class ExistingTask extends StatelessWidget {
-  final EstimatedTask task;
-  ExistingTask({
-    @required this.task,
+class TaskContainer extends StatelessWidget {
+  final Widget topChild;
+  final Widget leftChild;
+  final Widget rightChild;
+  final double width;
+  final double height;
+  TaskContainer({
+    @required this.topChild,
+    @required this.leftChild,
+    @required this.rightChild,
+    @required this.width,
+    @required this.height, 
     Key key
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        children: [
-          Text(task.name),
-          Row(
-            children: [
-              _createLeftData(task),
-              _createRightData(task)
-            ],
-          )
-        ],
+      width: this.width,
+      height: this.height,
+      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.015),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(30),
+          bottomRight: Radius.circular(15)
+        )
       ),
-    );
-  }
-
-  Widget _createLeftData(EstimatedTask task){
-    return Column(
+      child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Text('O: ${task.optimistic}'),
-        Text('N: ${task.normal}'),
-        Text('P: ${task.pesimistic}')
+        topChild,
+        Row(
+          children: [
+            leftChild,
+            rightChild
+          ],
+        )
       ],
-    );
-  }
-
-  Widget _createRightData(EstimatedTask task){
-    return Column(
-      children: [
-        Text('Est: ${task.estimate}'),
-        Text('Unc: ${task.uncertainty}'),
-      ],
+    )
     );
   }
 }

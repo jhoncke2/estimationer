@@ -1,7 +1,7 @@
 import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
-import 'package:flutter/material.dart';
+import 'package:estimationer/features/task/presentation/widgets/task_container.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter/material.dart';
 import '../bloc/tasks_bloc.dart';
 
 class TaskCreater extends StatefulWidget {
@@ -17,8 +17,6 @@ class _TaskCreaterState extends State<TaskCreater> {
   TextEditingController optimisticController;
   TextEditingController normalController;
   TextEditingController pesimisticController;
-  TextEditingController estimateController;
-  TextEditingController uncertaintyController;
 
   @override
   void initState() {
@@ -31,75 +29,85 @@ class _TaskCreaterState extends State<TaskCreater> {
 
   @override
   Widget build(BuildContext context) {
-    OnTaskCreation blocState = BlocProvider.of<TasksBloc>(context).state;
-    estimateController = TextEditingController(text: (blocState.estimate ?? '').toString());
-    uncertaintyController = TextEditingController(text: (blocState.uncertainty ?? '').toString());
     return Container(
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _createTaskBody(),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.59,
-            padding: EdgeInsets.zero,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createCancelButton(),
-                _createSuccessButton()
-              ],
-            ),
-          )
+          Column(
+            children: [
+              TaskContainer(
+                topChild: _createNameTextField(), 
+                leftChild: _createLeftElements(), 
+                rightChild: _createRightElements(), 
+                width: MediaQuery.of(context).size.width * 0.6, 
+                height: MediaQuery.of(context).size.height * 0.17
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.59,
+                padding: EdgeInsets.zero,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _createCancelButton(),
+                    _createSuccessButton()
+                  ],
+                ),
+              )
+            ],
+          ),
+          _createErrorMessage()
         ],
       ),
     );
   }
 
-  Widget _createTaskBody(){
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.6,
-      height: MediaQuery.of(context).size.height * 0.17,
-      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.015),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(30),
-          bottomRight: Radius.circular(15)
-        )
-      ),
-      child: _createInnerElements()
-    );
+  Widget _createErrorMessage(){
+    TasksState state = BlocProvider.of<TasksBloc>(context).state;
+    if(state is TaskInputError){
+      return Container(
+        child: Center(
+          child: Text(
+            '${state.message}',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).secondaryHeaderColor.withOpacity(0.9),
+              fontSize: 15
+            ),
+          ),
+        ),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(17.5)
+        ),
+        margin: EdgeInsets.only(left: 5, top: MediaQuery.of(context).size.height * 0.02),
+        padding: EdgeInsets.all(5),
+        width: MediaQuery.of(context).size.width * 0.3,
+        height: MediaQuery.of(context).size.height * 0.15,
+        
+      );
+    }else
+      return Container();
   }
 
-  Widget _createInnerElements(){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _createTextField(nameController, 'Name'),
-        Row(
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.height * 0.11,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _createTextField(optimisticController, 'Optimistic'),
-                  _createTextField(normalController, 'Expected'),
-                  _createTextField(pesimisticController, 'Pesimistic')
-                ],
-              ),
-            ),
-            _createRightElements()
-          ],
-        )
-      ],
+  Widget _createLeftElements(){
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.11,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _createNumberTextField(optimisticController, 'Optimistic'),
+          _createNumberTextField(normalController, 'Expected'),
+          _createNumberTextField(pesimisticController, 'Pesimistic')
+        ],
+      ),
     );
   }
   
   Widget _createRightElements(){
-    final OnTaskCreation state = BlocProvider.of<TasksBloc>(context).state;
-    final String stringEstimate = (state.estimate == null)? '' : state.estimate.toStringAsFixed(2);
-    final String stringUncertainty = (state.uncertainty == null)? '' : state.uncertainty.toStringAsFixed(2);
+    final TasksState state = BlocProvider.of<TasksBloc>(context).state;
+    final String stringEstimate = _getStateEstimate(state);
+    final String stringUncertainty = _getStateUncertainty(state);
     return Container(
       width: MediaQuery.of(context).size.width * 0.32,
       padding: EdgeInsets.only(left: 12.5),
@@ -114,13 +122,35 @@ class _TaskCreaterState extends State<TaskCreater> {
     );
   }
 
-  Widget _createTextField(TextEditingController controller, String hintText){
+  String _getStateEstimate(TasksState state){
+    if(state is OnGoodTaskCreation)
+      return state.estimate != null? state.estimate.toStringAsFixed(2) : '';
+    return '';
+  }
+
+  String _getStateUncertainty(TasksState state){
+    if(state is OnGoodTaskCreation)
+      return state.uncertainty != null? state.uncertainty.toStringAsFixed(2) : '';
+    return '';
+  }
+
+  Widget _createNameTextField(){
+    return _createTextField(this.nameController, 'name', TextInputType.name);
+  }
+
+  Widget _createNumberTextField(TextEditingController controller, String hintText){
+    return _createTextField(controller, hintText, TextInputType.number);
+  }
+
+  Widget _createTextField(TextEditingController controller, String hintText, TextInputType keyboardType){
     return Container(
       width: MediaQuery.of(context).size.width * 0.25,
       height: MediaQuery.of(context).size.height * 0.031,
       child: TextFormField(
         controller: controller,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
+          
           hintText: hintText,
           contentPadding: EdgeInsets.symmetric(horizontal: 5),
           filled: true,

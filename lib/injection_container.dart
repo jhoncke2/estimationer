@@ -11,11 +11,15 @@ import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'core/presentation/notifiers/keyboard_notifier.dart';
 import 'features/task/domain/use_cases/calculate_uncertainty.dart';
 
 final sl = GetIt.instance;
 
 Future init()async{
+
+  // ************** Core ********************
+  sl.registerLazySingleton(() => KeyboardNotifier());
 
   // ************** Features *********************
   //Tasks

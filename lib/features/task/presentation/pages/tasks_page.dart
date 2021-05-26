@@ -10,17 +10,29 @@ class TasksPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: BlocProvider<TasksBloc>(
-          create: (context) => sl(),
-          child: Container(
-            child: Column(
-              children: [_createTitle(context), _createTasks()],
+      body: GestureDetector(
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          color: Colors.transparent,
+          child: SafeArea(
+            child: BlocProvider<TasksBloc>(
+              create: (context) => sl(),
+              child: Container(
+                child: Column(
+                  children: [
+                    _createTitle(context), 
+                    _createTasks()
+                  ],
+                ),
+              ),
             ),
           ),
         ),
+        onTap: (){
+          FocusScope.of(context).requestFocus(new FocusNode());
+        }
       ),
-      backgroundColor: Theme.of(context).secondaryHeaderColor,
     );
   }
 
@@ -41,7 +53,7 @@ class TasksPage extends StatelessWidget {
     );
   }
 
-  Widget _createTasks() {
+  Widget _createTasks(){
     return Container(
       child: BlocBuilder<TasksBloc, TasksState>(
         builder: (context, state){
@@ -50,8 +62,8 @@ class TasksPage extends StatelessWidget {
             return Text('Empty tasks');
           }else if(state is OnTasks){
             return TasksList(tasks: state.tasks, isOnCreation: false);
-          }else if(state is OnTaskCreation){
-            return TasksList(tasks: state.tasks, isOnCreation: true);
+          }else if(state is OnGoodTaskCreation || state is TaskInputError){
+            return TasksList(tasks: (state as TasksLoaded).tasks, isOnCreation: true);
           }
           return Container();
         },

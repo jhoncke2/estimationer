@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:estimationer/core/presentation/notifiers/keyboard_notifier.dart';
 import 'package:estimationer/features/task/domain/entities/task.dart';
 import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
-import 'package:estimationer/features/task/presentation/widgets/task_container.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:estimationer/features/task/presentation/widgets/existing_task.dart';
+import '../../../../injection_container.dart';
 import 'task_creater.dart';
 // ignore: must_be_immutable
 class TasksList extends StatelessWidget {
@@ -18,33 +20,43 @@ class TasksList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context){
-    this.context = context;
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 20
       ),
-      child: SingleChildScrollView(
-        child: Row(
-          children: [
-            _createLeftLine(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createTasks(),
-                _createPlusButton()
-              ],
-            )
-          ],
-        ),
+      child: ChangeNotifierProvider<KeyboardNotifier>(
+        lazy: true,
+        create: (_) => sl(),
+        builder: (context, _){
+          this.context = context;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _createLeftLine(),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _createTasks(),
+                  _createTaskCreationComponent()
+                ],
+              )
+            ],
+          );
+        } 
       ),
     );
   }
 
   Widget _createLeftLine(){
+    final double heightPercent = 
+      Provider.of<KeyboardNotifier>(context).isActive?
+      0.45 : 
+      0.7;
     return Container(
       width: 15,
-      height: MediaQuery.of(context).size.height * 0.7,
+      height: MediaQuery.of(context).size.height * heightPercent,
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(10.0)
@@ -56,19 +68,47 @@ class TasksList extends StatelessWidget {
     List<Widget> tasksWidgets = tasks.map<Widget>(
       (t) => ExistingTask(task: t)
     ).toList();
-    if(isOnCreation){
-      tasksWidgets.add(TaskCreater());
-    }
     return Container(
       padding: EdgeInsets.symmetric(vertical: 15, horizontal: 0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: tasksWidgets,
-      ),
+      height: _getExistingTasksHeight(),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: tasksWidgets,
+        ),
+      )
     );
   }
 
+  double _getExistingTasksHeight(){
+    double heightFactor;
+    double heightPercentage = 0.195;
+    TasksState tasksState = BlocProvider.of<TasksBloc>(context).state;
+    if(Provider.of<KeyboardNotifier>(context).isActive){
+      heightFactor = 1;
+    }else if(tasksState is OnGoodTaskCreation || tasksState is TaskInputError){
+      heightFactor = 2;
+    }else{
+      heightFactor = (tasks.length < 4? tasks.length : 3).toDouble();
+      
+      (tasks.length % 3).toDouble();
+      if(heightFactor == 0)
+        heightFactor = 3;
+    }
+    if(heightFactor > 1)
+        heightPercentage = 0.1855;
+    double height = heightFactor * MediaQuery.of(context).size.height * heightPercentage;
+    return height;
+  }
+
+
+  Widget _createTaskCreationComponent(){
+    if(isOnCreation)
+      return TaskCreater();
+    else
+      return _createPlusButton();
+  }
   Widget _createPlusButton(){
     return MaterialButton(
       color: Theme.of(context).primaryColor,
@@ -82,7 +122,7 @@ class TasksList extends StatelessWidget {
         Icons.add,
         color: Colors.white,
       ),
-      onPressed: isOnCreation? null : _initTaskCreation
+      onPressed: _initTaskCreation
     );
   }
 

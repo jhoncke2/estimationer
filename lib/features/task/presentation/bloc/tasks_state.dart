@@ -26,11 +26,11 @@ class OnTasks extends TasksLoaded{
   }):super(tasks: tasks);
 }
 
-class OnTaskCreation extends TasksLoaded{
 
+class OnGoodTaskCreation extends TasksLoaded{
   final double estimate;
   final double uncertainty;
-  OnTaskCreation({
+  OnGoodTaskCreation({
     @required this.estimate,
     @required this.uncertainty,    
     @required List<EstimatedTask> tasks

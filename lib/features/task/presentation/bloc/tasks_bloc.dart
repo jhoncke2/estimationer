@@ -65,7 +65,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
 
   Stream<TasksState> _initTaskCreation()async*{
     final List<EstimatedTask> tasks = (state as TasksLoaded).tasks;
-    yield OnTaskCreation(
+    yield OnGoodTaskCreation(
       tasks: tasks,
       estimate: null,
       uncertainty: null
@@ -101,7 +101,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         yield * eitherUncertainty.fold((l)async*{
 
         }, (uncertainty)async*{
-          yield OnTaskCreation(estimate: estimate, uncertainty: uncertainty, tasks: tasks);
+          yield OnGoodTaskCreation(estimate: estimate, uncertainty: uncertainty, tasks: tasks);
         });
       });
     });
@@ -113,8 +113,8 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   }
 
   Stream<TasksState> _createTask(CreateTask event)async*{
-    final double estimate = (state as OnTaskCreation).estimate;
-    final double uncertainty = (state as OnTaskCreation).uncertainty;
+    final double estimate = (state as OnGoodTaskCreation).estimate;
+    final double uncertainty = (state as OnGoodTaskCreation).uncertainty;
     final List<EstimatedTask> tasks = (state as TasksLoaded).tasks;
     yield LoadingTaskCreation();
     final eitherNameEvaluation = inputsManager.evaluateStringValue(event.name);
