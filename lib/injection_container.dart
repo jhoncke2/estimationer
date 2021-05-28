@@ -1,25 +1,24 @@
-import 'package:estimationer/core/helpers/string_to_double_converter.dart';
-import 'package:estimationer/core/platform/database.dart';
-import 'package:estimationer/features/task/data/data_source/local_data_source.dart';
-import 'package:estimationer/features/task/data/repository/tasks_repository.dart';
-import 'package:estimationer/features/task/domain/repository/tasks_repository.dart';
-import 'package:estimationer/features/task/domain/use_cases/calculate_estimate.dart';
-import 'package:estimationer/features/task/domain/use_cases/get_tasks.dart';
-import 'package:estimationer/features/task/domain/use_cases/remove_task.dart';
-import 'package:estimationer/features/task/domain/use_cases/set_task.dart';
-import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite/sqflite.dart';
-
+import 'package:estimationer/core/helpers/string_to_double_converter.dart';
+import 'package:estimationer/core/platform/database.dart';
+import 'package:estimationer/features/task_group/data/data_source/local_data_source.dart';
+import 'package:estimationer/features/task_group/data/repository/tasks_repository.dart';
+import 'package:estimationer/features/task_group/domain/repository/tasks_repository.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/calculate_estimate.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/get_tasks.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/remove_task.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/set_task.dart';
+import 'package:estimationer/features/task_group/presentation/bloc/tasks_bloc.dart';
 import 'core/presentation/notifiers/keyboard_notifier.dart';
-import 'features/task/domain/use_cases/calculate_uncertainty.dart';
+import 'features/task_group/domain/use_cases/calculate_uncertainty.dart';
 
 final sl = GetIt.instance;
 
 Future init()async{
 
   // ************** Core ********************
-  sl.registerLazySingleton(() => KeyboardNotifier());
+  sl.registerFactory(() => KeyboardNotifier());
 
   // ************** Features *********************
   //Tasks

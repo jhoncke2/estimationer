@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:estimationer/core/presentation/notifiers/keyboard_notifier.dart';
-import 'package:estimationer/features/task/domain/entities/task.dart';
-import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
-import 'package:estimationer/features/task/presentation/widgets/existing_task.dart';
+import 'package:estimationer/features/task_group/domain/entities/task.dart';
+import 'package:estimationer/features/task_group/presentation/bloc/tasks_bloc.dart';
+import 'package:estimationer/features/task_group/presentation/widgets/existing_task.dart';
 import '../../../../injection_container.dart';
 import 'task_creater.dart';
+
 // ignore: must_be_immutable
 class TasksList extends StatelessWidget {
   final List<EstimatedTask> tasks;

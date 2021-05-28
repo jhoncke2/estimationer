@@ -1,7 +1,7 @@
 import 'package:estimationer/core/constant/constants.dart';
 import 'package:meta/meta.dart';
 import 'package:estimationer/core/platform/database.dart';
-import 'package:estimationer/features/task/data/models/task_model.dart';
+import 'package:estimationer/features/task_group/data/models/task_model.dart';
 
 abstract class TasksLocalDataSource{
   Future<List<EstimatedTaskModel>> getTasks();

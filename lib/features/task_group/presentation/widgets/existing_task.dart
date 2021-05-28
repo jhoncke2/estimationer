@@ -1,5 +1,5 @@
-import 'package:estimationer/features/task/domain/entities/task.dart';
-import 'package:estimationer/features/task/presentation/widgets/task_container.dart';
+import 'package:estimationer/features/task_group/domain/entities/task.dart';
+import 'package:estimationer/features/task_group/presentation/widgets/task_container.dart';
 import 'package:flutter/material.dart';
 
 class ExistingTask extends StatelessWidget {

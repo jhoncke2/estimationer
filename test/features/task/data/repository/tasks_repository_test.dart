@@ -4,9 +4,9 @@ import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:estimationer/core/error/exceptions.dart';
 import 'package:estimationer/core/error/failures.dart';
-import 'package:estimationer/features/task/data/data_source/local_data_source.dart';
-import 'package:estimationer/features/task/data/models/task_model.dart';
-import 'package:estimationer/features/task/data/repository/tasks_repository.dart';
+import 'package:estimationer/features/task_group/data/data_source/local_data_source.dart';
+import 'package:estimationer/features/task_group/data/models/task_model.dart';
+import 'package:estimationer/features/task_group/data/repository/tasks_repository.dart';
 import '../../../../fixtures/fixture_reader.dart';
 
 class MockTasksLocalDataSource extends Mock implements TasksLocalDataSource{}

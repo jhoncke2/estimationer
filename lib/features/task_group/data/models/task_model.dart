@@ -1,5 +1,5 @@
 import 'package:meta/meta.dart';
-import 'package:estimationer/features/task/domain/entities/task.dart';
+import 'package:estimationer/features/task_group/domain/entities/task.dart';
 
 List<EstimatedTaskModel> tasksFromJson(List<Map<String, dynamic>> jsonTasks) => 
     jsonTasks.map((jT) => EstimatedTaskModel.fromJson(jT)).toList();

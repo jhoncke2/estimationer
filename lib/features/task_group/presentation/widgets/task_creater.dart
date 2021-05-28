@@ -1,5 +1,4 @@
-import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
-import 'package:estimationer/features/task/presentation/widgets/task_container.dart';
+import 'package:estimationer/features/task_group/presentation/widgets/task_container.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import '../bloc/tasks_bloc.dart';

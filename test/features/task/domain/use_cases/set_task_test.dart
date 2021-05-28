@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:estimationer/features/task/data/models/task_model.dart';
-import 'package:estimationer/features/task/domain/entities/task.dart';
-import 'package:estimationer/features/task/domain/repository/tasks_repository.dart';
-import 'package:estimationer/features/task/domain/use_cases/set_task.dart';
+import 'package:estimationer/features/task_group/data/models/task_model.dart';
+import 'package:estimationer/features/task_group/domain/entities/task.dart';
+import 'package:estimationer/features/task_group/domain/repository/tasks_repository.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/set_task.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 

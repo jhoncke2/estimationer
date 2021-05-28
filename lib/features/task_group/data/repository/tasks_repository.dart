@@ -1,11 +1,11 @@
-import 'package:dartz/dartz.dart';
-import 'package:estimationer/core/error/exceptions.dart';
-import 'package:estimationer/features/task/data/models/task_model.dart';
 import 'package:meta/meta.dart';
-import 'package:estimationer/features/task/data/data_source/local_data_source.dart';
-import 'package:estimationer/features/task/domain/entities/task.dart';
+import 'package:dartz/dartz.dart';
 import 'package:estimationer/core/error/failures.dart';
-import 'package:estimationer/features/task/domain/repository/tasks_repository.dart';
+import 'package:estimationer/core/error/exceptions.dart';
+import 'package:estimationer/features/task_group/data/models/task_model.dart';
+import 'package:estimationer/features/task_group/data/data_source/local_data_source.dart';
+import 'package:estimationer/features/task_group/domain/entities/task.dart';
+import 'package:estimationer/features/task_group/domain/repository/tasks_repository.dart';
 
 class TasksRepositoryImpl implements TasksRepository{
 

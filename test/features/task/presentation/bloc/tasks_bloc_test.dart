@@ -5,15 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:estimationer/core/error/failures.dart';
 import 'package:estimationer/core/domain/use_cases/use_case.dart';
 import 'package:estimationer/core/helpers/string_to_double_converter.dart';
-import 'package:estimationer/features/task/data/models/task_model.dart';
-import 'package:estimationer/features/task/domain/entities/task.dart';
-import 'package:estimationer/features/task/domain/use_cases/calculate_estimate.dart';
-import 'package:estimationer/features/task/domain/use_cases/calculate_uncertainty.dart';
-import 'package:estimationer/features/task/domain/use_cases/get_tasks.dart';
-import 'package:estimationer/features/task/domain/use_cases/params.dart';
-import 'package:estimationer/features/task/domain/use_cases/remove_task.dart';
-import 'package:estimationer/features/task/domain/use_cases/set_task.dart';
-import 'package:estimationer/features/task/presentation/bloc/tasks_bloc.dart';
+import 'package:estimationer/features/task_group/data/models/task_model.dart';
+import 'package:estimationer/features/task_group/domain/entities/task.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/calculate_estimate.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/calculate_uncertainty.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/get_tasks.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/params.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/remove_task.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/set_task.dart';
+import 'package:estimationer/features/task_group/presentation/bloc/tasks_bloc.dart';
 import '../../../../fixtures/fixture_reader.dart';
 
 class MockGetTasks extends Mock implements GetTasks{}

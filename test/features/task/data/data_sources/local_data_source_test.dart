@@ -3,8 +3,8 @@ import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:estimationer/core/platform/database.dart';
 import 'package:estimationer/core/constant/constants.dart';
-import 'package:estimationer/features/task/data/models/task_model.dart';
-import 'package:estimationer/features/task/data/data_source/local_data_source.dart';
+import 'package:estimationer/features/task_group/data/models/task_model.dart';
+import 'package:estimationer/features/task_group/data/data_source/local_data_source.dart';
 import '../../../../fixtures/fixture_reader.dart';
 
 class MockDataBaseManager extends Mock implements DataBaseManager{}

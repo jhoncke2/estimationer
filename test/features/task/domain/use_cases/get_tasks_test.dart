@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:estimationer/core/domain/use_cases/use_case.dart';
 import 'package:estimationer/core/error/failures.dart';
-import 'package:estimationer/features/task/data/models/task_model.dart';
-import 'package:estimationer/features/task/domain/entities/task.dart';
-import 'package:estimationer/features/task/domain/repository/tasks_repository.dart';
-import 'package:estimationer/features/task/domain/use_cases/get_tasks.dart';
+import 'package:estimationer/features/task_group/data/models/task_model.dart';
+import 'package:estimationer/features/task_group/domain/entities/task.dart';
+import 'package:estimationer/features/task_group/domain/repository/tasks_repository.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/get_tasks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 

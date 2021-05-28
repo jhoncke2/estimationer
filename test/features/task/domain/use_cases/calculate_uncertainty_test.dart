@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:estimationer/features/task/domain/use_cases/calculate_uncertainty.dart';
-import 'package:estimationer/features/task/domain/use_cases/params.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/calculate_uncertainty.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/params.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 CalculateUncertainty useCase;
