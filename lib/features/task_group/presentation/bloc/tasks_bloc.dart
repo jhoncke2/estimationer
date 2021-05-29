@@ -1,12 +1,14 @@
 import 'dart:async';
+import 'package:estimationer/features/task_group/domain/entities/task_group.dart';
 import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:estimationer/core/error/failures.dart';
+import 'package:estimationer/core/domain/use_cases/use_case.dart';
 import 'package:estimationer/core/helpers/string_to_double_converter.dart';
 import 'package:estimationer/features/task_group/domain/use_cases/params.dart';
-import 'package:estimationer/core/domain/use_cases/use_case.dart';
 import 'package:estimationer/features/task_group/domain/use_cases/get_tasks.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/get_task_group.dart';
 import 'package:estimationer/features/task_group/domain/use_cases/calculate_estimate.dart';
 import 'package:estimationer/features/task_group/domain/use_cases/calculate_uncertainty.dart';
 import 'package:estimationer/features/task_group/domain/use_cases/remove_task.dart';
@@ -20,6 +22,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   static const BAD_INPUT_VALUE_MESSAGE = 'Todos los campos deben tener valores numéricos mayores a 0';
   static const UNCOMPLETE_INPUT_VALUES = 'Todos los campos deben estar llenos';
 
+  final GetTaskGroup getTaskGroup;
   final GetTasks getTasks;
   final SetTask setTask;
   final RemoveTask removeTask;
@@ -28,6 +31,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   final InputValuesManager inputsManager;
 
   TasksBloc({
+    @required this.getTaskGroup,
     @required this.getTasks,
     @required this.setTask,
     @required this.removeTask,
@@ -40,7 +44,9 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   Stream<TasksState> mapEventToState(
     TasksEvent event,
   ) async* {
-    if(event is LoadTasks){
+    if(event is LoadTaskGroup){
+      yield * _loadTaskGroup(event);
+    }else if(event is LoadTasks){
       yield * _loadTasks(event);
     }else if(event is InitTaskCreation){
       yield * _initTaskCreation();
@@ -51,6 +57,16 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     }else if(event is CreateTask){
       yield * _createTask(event);
     }
+  }
+
+  Stream<TasksState> _loadTaskGroup(LoadTaskGroup event)async*{
+    yield LoadingTaskGroup();
+    final eitherTaskGroup = await getTaskGroup(TaskGroupParams(id: event.id));
+    yield * eitherTaskGroup.fold((_)async*{
+
+    }, (taskGroup)async*{
+      yield OnTaskGroup(taskGroup: taskGroup);
+    });
   }
 
   Stream<TasksState> _loadTasks(LoadTasks event)async*{
@@ -157,5 +173,4 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         });
       });
   }
-
 }

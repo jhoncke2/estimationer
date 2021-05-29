@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
+import 'package:estimationer/features/task_group/data/models/task_group_model.dart';
+import 'package:estimationer/features/task_group/domain/entities/task_group.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/get_task_group.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:estimationer/core/error/failures.dart';
@@ -16,6 +19,7 @@ import 'package:estimationer/features/task_group/domain/use_cases/set_task.dart'
 import 'package:estimationer/features/task_group/presentation/bloc/tasks_bloc.dart';
 import '../../../../fixtures/fixture_reader.dart';
 
+class MockGetTaskGroup extends Mock implements GetTaskGroup{}
 class MockGetTasks extends Mock implements GetTasks{}
 class MockSetTask extends Mock implements SetTask{}
 class MockRemoveTask extends Mock implements RemoveTask{}
@@ -24,6 +28,7 @@ class MockCalculateUncertainty extends Mock implements CalculateUncertainty{}
 class MockStringToDoubleConverter extends Mock implements InputValuesManager{}
 
 TasksBloc bloc;
+MockGetTaskGroup getTaskGroup;
 MockGetTasks getTasks;
 MockSetTask setTask;
 MockRemoveTask removeTask;
@@ -39,7 +44,9 @@ void main(){
     removeTask = MockRemoveTask();
     setTask = MockSetTask();
     getTasks = MockGetTasks();
+    getTaskGroup = MockGetTaskGroup();
     bloc = TasksBloc(
+      getTaskGroup: getTaskGroup,
       getTasks: getTasks, 
       setTask: setTask, 
       removeTask: removeTask,
@@ -53,7 +60,31 @@ void main(){
     expect(bloc.state, TasksEmpty());
   });
 
-  group('getTasks', (){
+  group('loadTaskGroup', (){
+    TaskGroup tTaskGroup;
+    setUp((){
+      tTaskGroup = _getTaskGroupFromFixture();
+    });
+
+    test('should call the specified usecase', ()async{
+      when(getTaskGroup.call(any)).thenAnswer((_) async => Right(tTaskGroup));
+      bloc.add(LoadTaskGroup(id: tTaskGroup.id));
+      await untilCalled(getTaskGroup(any));
+      verify(getTaskGroup(TaskGroupParams(id: tTaskGroup.id)));
+    });
+    
+    test('should yield the specified states when all goes good', ()async{
+      when(getTaskGroup.call(any)).thenAnswer((_) async => Right(tTaskGroup));
+      final expectedOrderedStates = [
+        LoadingTaskGroup(),
+        OnTaskGroup(taskGroup: tTaskGroup)
+      ];
+      expectLater(bloc.stream, emitsInOrder(expectedOrderedStates));
+      bloc.add(LoadTaskGroup(id: tTaskGroup.id));
+    });
+  });
+
+  group('loadTasks', (){
     List<EstimatedTask> tTasks;
     setUp((){
       tTasks = _getTasksFromFixture();
@@ -331,7 +362,13 @@ EstimatedTask _getTaskFromTaskModel(EstimatedTaskModel tModel)=>EstimatedTask(
   name: tModel.name, 
   pesimistic: tModel.pesimistic, 
   optimistic: tModel.optimistic, 
-  normal: tModel.normal, 
+  normal: tModel.normal,
   estimate: tModel.estimate, 
   uncertainty: tModel.uncertainty
 );
+
+TaskGroup _getTaskGroupFromFixture(){
+  final String sTaskGroup = callFixture('task_group.json');
+  final Map<String, dynamic> jTaskGroup = jsonDecode(sTaskGroup);
+  return TaskGroupModel.fromJson(jTaskGroup);
+}

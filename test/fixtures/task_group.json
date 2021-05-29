@@ -1,0 +1,29 @@
+{
+    "id":1,
+    "name":"task_group_1",
+    "initial_date":"28/05/2021",
+    "final_date":"31/06/2021",
+    "total_estimate":3.8,
+    "total_uncertainty":1.2521980673998822,
+    "tasks": [
+        {
+            "id":0,
+            "name":"task_1",
+            "pesimistic":3.5,
+            "optimistic":0.1,
+            "normal":1,
+            "estimate":1.26,
+            "uncertainty":0.56
+        },
+        {
+            "id":1,
+            "name":"task_2",
+            "pesimistic":7,
+            "optimistic":0.2,
+            "normal":2,
+            "estimate":2.53,
+            "uncertainty":1.12
+        }
+    ]
+    
+}

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:estimationer/features/task_group/data/models/task_group_model.dart';
+import 'package:estimationer/features/task_group/domain/entities/task_group.dart';
 import 'package:estimationer/core/platform/database.dart';
 import 'package:estimationer/core/constant/constants.dart';
 import 'package:estimationer/features/task_group/data/models/task_model.dart';
@@ -16,6 +18,39 @@ void main(){
   setUp((){
     dbManager = MockDataBaseManager();
     dataSource = TasksLocalDataSourceImpl(dbManager: dbManager);
+  });
+
+  group('getTaskGroup', (){
+    Map<String, dynamic> tJsonTaskGroupWithoutTasks;
+    List<Map<String, dynamic>> tJsonTasks;
+    List<EstimatedTaskModel> tTasks;
+    TaskGroup tTaskGroup;
+    setUp((){
+      tJsonTaskGroupWithoutTasks = jsonDecode( callFixture('task_group.json') );
+      tJsonTasks = tJsonTaskGroupWithoutTasks['tasks'].cast<Map<String, dynamic>>();
+      tJsonTaskGroupWithoutTasks['tasks'] = null;
+      tTaskGroup = TaskGroupModel.fromJson( jsonDecode( callFixture('task_group.json') ) );
+      tTasks = tasksFromJson(tJsonTasks);
+    });
+
+    test('should call the localDataSource method', ()async{
+      when(dbManager.queryWhere(any, any, any)).thenAnswer((realInvocation) async => tJsonTasks);
+      when(dbManager.querySingleOne(any, any)).thenAnswer((realInvocation) async => tJsonTaskGroupWithoutTasks);
+      await dataSource.getTaskGroup(tTaskGroup.id);
+      verify(dbManager.queryWhere(
+        TASKS_TABLE_NAME, 
+        '$TASKS_TASK_GROUP_ID = ?',
+        [tTaskGroup.id] 
+      ));
+      verify(dbManager.querySingleOne(TASK_GROUPS_TABLE_NAME, tTaskGroup.id));
+    });
+
+    test('should return the complete taskGroup with the tasks inside', ()async{
+      when(dbManager.queryWhere(any, any, any)).thenAnswer((realInvocation) async => tJsonTasks);
+      when(dbManager.querySingleOne(any, any)).thenAnswer((realInvocation) async => tJsonTaskGroupWithoutTasks);
+      final TaskGroup taskGroup = await dataSource.getTaskGroup(tTaskGroup.id);
+      expect(taskGroup, tTaskGroup);
+    });
   });
 
   group('getTasks', (){

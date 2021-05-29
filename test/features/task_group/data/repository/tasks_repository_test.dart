@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
+import 'package:estimationer/features/task_group/data/models/task_group_model.dart';
+import 'package:estimationer/features/task_group/domain/entities/task_group.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:estimationer/core/error/exceptions.dart';
@@ -18,6 +20,30 @@ void main(){
   setUp((){
     localDataSource = MockTasksLocalDataSource();
     repository = TasksRepositoryImpl(localDataSource: localDataSource);
+  });
+
+  group('getTaskGroup', (){
+    TaskGroup tTaskGroup;
+    setUp((){
+      tTaskGroup = _getTaskGroupFromFixture();
+    });
+
+    test('should call the localDataSource method', ()async{
+      await repository.getTaskGroup(tTaskGroup.id);
+      verify(localDataSource.getTaskGroup(tTaskGroup.id));
+    });
+
+    test('should return Right(tTaskGroup) when all goes good', ()async{
+      when(localDataSource.getTaskGroup(any)).thenAnswer((_) async => tTaskGroup);
+      final result = await repository.getTaskGroup(tTaskGroup.id);
+      expect(result, Right(tTaskGroup));
+    });
+
+    test('should return Left(DBFailure) when localDataSource throws a DBException', ()async{
+      when(localDataSource.getTaskGroup(any)).thenThrow(DBException(type: DBExceptionType.PLATFORM));
+      final result = await repository.getTaskGroup(tTaskGroup.id);
+      expect(result, Left(DBFailure(type: DBFailureType.PLATFORM)));
+    });
   });
 
   group('getTasks', (){
@@ -96,4 +122,10 @@ List<EstimatedTaskModel> _getTasksFromFixture(){
   String stringTasks = callFixture('tasks.json');
   List<Map<String, dynamic>> jsonTasks = jsonDecode(stringTasks).cast<Map<String, dynamic>>();
   return tasksFromJson(jsonTasks);
+}
+
+TaskGroup _getTaskGroupFromFixture(){
+  final String stringTaskGroup = callFixture('task_group.json');
+  final Map<String, dynamic> jsonTG = jsonDecode(stringTaskGroup);
+  return TaskGroupModel.fromJson(jsonTG);
 }

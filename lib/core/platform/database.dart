@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 abstract class DataBaseManager{
   Future<List<Map<String, dynamic>>> queryAll(String tableName);
   Future<Map<String, dynamic>> querySingleOne(String tableName, int id);
+  Future<List<Map<String, dynamic>>> queryWhere(String tableName, String whereStatement, List<dynamic> whereVariables);
   Future<int> insert(String tableName, Map<String, dynamic> data);
   Future<void> update(String tableName, Map<String, dynamic> row, int id);
   Future<void> remove(String tableName, int id);
@@ -33,6 +34,13 @@ class DataBaseManagerImpl implements DataBaseManager{
   Future<Map<String, dynamic>> querySingleOne(String tableName, int id)async{
     return await _executeOperation(()async =>
       (await db.query(tableName, where: '$TASKS_ID = ?', whereArgs: [id]) )[0]
+    );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> queryWhere(String tableName, String whereStatement, List whereArgs)async{
+    return await _executeOperation(()async =>
+      await db.query(tableName, where: whereStatement, whereArgs: whereArgs)
     );
   }
 
@@ -93,5 +101,15 @@ class CustomDataBaseFactory{
         )
       '''
     );
+    db.execute('''
+      CREATE TABLE $TASK_GROUPS_TABLE_NAME (
+        $TASK_GROUPS_ID INTEGER PRIMARY KEY,
+        $TASK_GROUPS_NAME TEXT NOT NULL,
+        $TASK_GROUPS_TOTAL_ESTIMATE FLOAT,
+        $TASK_GROUPS_TOTAL_UNCERTAINTY FLOAT,
+        $TASK_GROUPS_INITIAL_DATE TEXT NOT NULL,
+        $TASK_GROUPS_FINAL_DATE TEXT
+      )
+    ''');
   }
 }

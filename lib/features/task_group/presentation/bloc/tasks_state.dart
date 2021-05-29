@@ -11,6 +11,27 @@ class TasksEmpty extends TasksState {}
 
 class LoadingTasks extends TasksState {}
 
+class LoadingTaskGroup extends TasksState {}
+
+abstract class TaskGroupLoaded extends TasksState{
+  final TaskGroup taskGroup;
+
+  TaskGroupLoaded({
+    @required this.taskGroup
+  });
+
+  @override
+  List<Object> get props => [...super.props, this.taskGroup];
+}
+
+class OnTaskGroup extends TaskGroupLoaded{
+  OnTaskGroup({
+    @required TaskGroup taskGroup
+  }):super(
+    taskGroup: taskGroup
+  );
+}
+
 abstract class TasksLoaded extends TasksState{
   final List<EstimatedTask> tasks;
   TasksLoaded({

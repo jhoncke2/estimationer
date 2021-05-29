@@ -14,12 +14,21 @@ class TaskGroupModel extends TaskGroup{
   });
 
   factory TaskGroupModel.fromJson(Map<String, dynamic> json)=>TaskGroupModel(
-    id: json['id'], 
-    name: json['name'], 
-    tasks: tasksFromJson(json['tasks']), 
-    totalEstimate: json['totalEstimate'], 
-    totalUncertainty: json['totalUncertainty'], 
-    initialDate: json['initialDate'], 
-    finalDate: json['finalDate']
+    id: json['id'],
+    name: json['name'],
+    tasks: json['tasks']!=null? tasksFromJson(json['tasks'].cast<Map<String, dynamic>>()) : [],
+    totalEstimate: json['total_estimate'],
+    totalUncertainty: json['total_uncertainty'],
+    initialDate: _getDateTimeFromString( json['initial_date'] ),
+    finalDate: _getDateTimeFromString( json['final_date'] )
   );
+  
+  static DateTime _getDateTimeFromString(String stringDT){
+    List<String> stringDTParts = stringDT.split('/');
+    return DateTime(
+      int.parse(stringDTParts[2]),
+      int.parse(stringDTParts[1]),
+      int.parse(stringDTParts[0])
+    );
+  }
 }

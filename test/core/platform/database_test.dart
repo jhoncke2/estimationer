@@ -47,6 +47,41 @@ void main(){
     });
   });
 
+  group('queryWhere', (){
+    String tTableName;
+    String tWhereStatement;
+    List<dynamic> tWhereVariables;
+    List<Map<String, dynamic>> tReturnedValues;
+    setUp((){
+      tTableName = 'table_name';
+      tWhereStatement = 'p = ? and fruta = ?';
+      tWhereVariables = [1, "maracuyá"];
+      tReturnedValues = [{'n':1}, {'n':2}];
+    });
+
+    test('should call the db method with the tableName', ()async{
+      await dbManager.queryWhere(tTableName, tWhereStatement, tWhereVariables);
+      verify(db.query(tTableName, where: tWhereStatement, whereArgs: tWhereVariables));
+    });
+
+    test('should return the db return', ()async{
+      when(db.query(any, where: anyNamed('where'), whereArgs: anyNamed('whereArgs'))).thenAnswer((_) async => tReturnedValues);
+      final result = await dbManager.queryWhere(tTableName, tWhereStatement, tWhereVariables);
+      expect(result, tReturnedValues);
+    });
+
+    test('should return the db return', ()async{
+      when(db.query(any, where: anyNamed('where'), whereArgs: anyNamed('whereArgs'))).thenThrow(PlatformException(code: 'parangaricutirimicuaro'));
+      try{
+        await dbManager.queryWhere(tTableName, tWhereStatement, tWhereVariables);
+        fail('debería lanzar un exception');
+      }catch(exception){
+        expect(exception.runtimeType, DBException);
+        expect((exception as DBException).type, DBExceptionType.PLATFORM);
+      }
+    });
+  });
+
   group('querySingleOne', (){
     String tTableName;
     int tId;

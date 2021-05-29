@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:estimationer/features/task_group/domain/use_cases/get_task_group.dart';
 import 'package:estimationer/core/helpers/string_to_double_converter.dart';
 import 'package:estimationer/core/platform/database.dart';
 import 'package:estimationer/features/task_group/data/data_source/local_data_source.dart';
@@ -26,6 +27,7 @@ Future init()async{
 
   sl.registerLazySingleton<TasksRepository>(()=>TasksRepositoryImpl(localDataSource: sl()));
 
+  sl.registerLazySingleton(()=>GetTaskGroup(repository: sl()));
   sl.registerLazySingleton(()=>GetTasks(repository: sl()));
   sl.registerLazySingleton(()=>SetTask(repository: sl()));
   sl.registerLazySingleton(()=>RemoveTask(repository: sl()));
@@ -34,6 +36,7 @@ Future init()async{
   sl.registerLazySingleton<InputValuesManager>(()=>InputValuesManagerImpl());
 
   sl.registerLazySingleton(()=>TasksBloc(
+    getTaskGroup: sl(),
     getTasks: sl(), 
     setTask: sl(), 
     removeTask: sl(), 

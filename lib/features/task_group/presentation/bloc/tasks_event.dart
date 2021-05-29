@@ -7,6 +7,14 @@ abstract class TasksEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class LoadTaskGroup extends TasksEvent{
+  final int id;
+
+  LoadTaskGroup({
+    @required this.id
+  });
+}
+
 class LoadTasks extends TasksEvent{}
 
 class InitTaskCreation extends TasksEvent{}
